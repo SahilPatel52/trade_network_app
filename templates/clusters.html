@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Clusters{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h1>Clusters</h1>
+  <a href="/" class="btn btn-link">&larr; Back to Home</a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">Error during cluster analysis: {{ error }}</div>
+{% elif communities %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header">Detected Trade Communities</div>
+    <div class="card-body">
+      <p class="small text-muted">Groups with dense internal trade connections. Found {{ communities|length }} communities.</p>
+      {% for community in communities %}
+        <div class="mb-3">
+          <h5>Community {{ loop.index }} ({{ community|length }} members)</h5>
+          <p>{{ community|join(', ') }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-info">No clustering results could be generated.</div>
+{% endif %}
+{% endblock %}
