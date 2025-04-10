@@ -12,7 +12,7 @@ from networkx.algorithms import community as nx_community # Use alias to avoid n
 app = Flask(__name__)
 
 # --- MongoDB Configuration ---
-MONGO_URI = os.environ.get('MONGO_URI') # NEW LINE using environment variable
+MONGO_URI = os.environ.get("MONGO_URI") # NEW LINE using environment variable
 
 # Initialize MongoDB Client
 db_status = "MongoDB status unknown"
