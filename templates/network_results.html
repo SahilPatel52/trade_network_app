@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Network Analysis Results{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h1>Network Analysis Results</h1>
+  <a href="/" class="btn btn-link">&larr; Back to Home</a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">Error during analysis: {{ error }}</div>
+{% elif results or communities %}
+  <!-- Graph Summary -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header">Graph Summary</div>
+    <div class="card-body">
+      <p>Nodes (Countries/Territories): {{ graph_info.get('nodes', 'N/A') }}</p>
+      <p>Edges (Directed Export Flows > 0): {{ graph_info.get('edges', 'N/A') }}</p>
+    </div>
+  </div>
+
+  <!-- Centrality Results -->
+  {% if results %}
+    {% if results.out_degree %}
+      <div class="mb-4">
+        <h3>Top {{ results.out_degree|length }} by Out-Degree</h3>
+        <p class="small text-muted">(Unique export partners)</p>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Country</th>
+              <th>Out-Degree</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in results.out_degree %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ item[0] }}</td>
+              <td>{{ item[1] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    {% if results.in_degree %}
+      <div class="mb-4">
+        <h3>Top {{ results.in_degree|length }} by In-Degree</h3>
+        <p class="small text-muted">(Unique import sources)</p>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Country</th>
+              <th>In-Degree</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in results.in_degree %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ item[0] }}</td>
+              <td>{{ item[1] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    {% if results.betweenness %}
+      <div class="mb-4">
+        <h3>Top {{ results.betweenness|length }} by Betweenness Centrality (Weighted)</h3>
+        <p class="small text-muted">Measures influence as a trade flow bridge.</p>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Country</th>
+              <th>Betweenness</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in results.betweenness %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ item[0] }}</td>
+              <td>{{ "{:.6f}".format(item[1]) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    {% if results.eigenvector %}
+      <div class="mb-4">
+        <h3>Top {{ results.eigenvector|length }} by Eigenvector Centrality (Weighted)</h3>
+        <p class="small text-muted">Influence based on connections to important nodes.</p>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Country</th>
+              <th>Eigenvector</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in results.eigenvector %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ item[0] }}</td>
+              <td>{{ "{:.6f}".format(item[1]) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <!-- Communities -->
+  {% if communities %}
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header">Detected Trade Communities (Louvain Method)</div>
+      <div class="card-body">
+        <p class="small text-muted">Groups with dense internal trade connections. Found {{ communities|length }} communities.</p>
+        {% for community in communities %}
+          <div class="mb-3">
+            <h5>Community {{ loop.index }} ({{ community|length }} members)</h5>
+            <p>{{ community|join(', ') }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% elif not error %}
+    <div class="alert alert-info">No communities could be detected or calculated.</div>
+  {% endif %}
+{% else %}
+  <div class="alert alert-info">No analysis results could be generated.</div>
+{% endif %}
+{% endblock %}

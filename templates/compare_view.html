@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Compare: {{ country_A }} vs {{ country_B }}{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h1 class="mb-3">Trade Comparison: {{ country_A }} vs {{ country_B }} (Year {{ year }})</h1>
+  <a href="/" class="btn btn-link">&larr; Back to Home</a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% elif trade_data %}
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="card-title">Summary</h4>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          Trade Flow ({{ country_A }} &rarr; {{ country_B }}): 
+          <span class="fw-bold">{{ "{:,.0f}".format(trade_data.A_to_B_value) }} USD</span>
+          <small class="text-muted">(Reported by {{ country_A if trade_data.A_to_B_reported else country_B }})</small>
+        </li>
+        <li class="list-group-item">
+          Trade Flow ({{ country_B }} &rarr; {{ country_A }}): 
+          <span class="fw-bold">{{ "{:,.0f}".format(trade_data.B_to_A_value) }} USD</span>
+          <small class="text-muted">(Reported by {{ country_B if trade_data.B_to_A_reported else country_A }})</small>
+        </li>
+        <li class="list-group-item">
+          Balance for {{ country_A }} (Exports - Imports): 
+          <span class="{% if trade_data.balance > 0 %}text-success{% elif trade_data.balance < 0 %}text-danger{% else %}text-secondary{% endif %}">
+            {{ "{:,.0f}".format(trade_data.balance) }} USD
+          </span>
+          ({{ 'Surplus' if trade_data.balance > 0 else ('Deficit' if trade_data.balance < 0 else 'Balanced') }})
+        </li>
+      </ul>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-info">No specific trade data found between {{ country_A }} and {{ country_B }}.</div>
+{% endif %}
+{% endblock %}

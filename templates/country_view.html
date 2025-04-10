@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Trade Details for {{ selected_country }}{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h1>Trade Details for {{ selected_country }} (Year {{ year }})</h1>
+  <a href="/" class="btn btn-link">&larr; Back to Home</a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% else %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header">Overall Trade with World</div>
+    <div class="card-body">
+      {% if world_data %}
+        <p>
+          Total Exports: {{ "{:,.0f}".format(world_data.get('export', 0)) }} USD 
+          {% if world_data.get('export_calculated') %}<span class="text-info">*</span>{% endif %}<br>
+          Total Imports: {{ "{:,.0f}".format(world_data.get('import', 0)) }} USD 
+          {% if world_data.get('import_calculated') %}<span class="text-info">*</span>{% endif %}<br>
+          Overall Balance:
+          <span class="{% if world_data.balance > 0 %}text-success{% elif world_data.balance < 0 %}text-danger{% else %}text-secondary{% endif %}">
+            {{ "{:,.0f}".format(world_data.balance) }} USD
+          </span>
+          ({{ 'Surplus' if world_data.balance > 0 else ('Deficit' if world_data.balance < 0 else 'Balanced') }})
+        </p>
+        {% if world_data.get('export_calculated') or world_data.get('import_calculated') %}
+          <p class="small text-muted">* Calculated by summing partner data; may be incomplete due to reporting gaps.</p>
+        {% endif %}
+      {% else %}
+        <div class="alert alert-warning">Overall trade data could not be determined.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header">Trade with Partners</div>
+    <div class="card-body">
+      {% if partner_data %}
+        <p class="mb-2">Showing {{ partner_data|length }} partners.</p>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th>Exports (USD)</th>
+              <th>Imports (USD)</th>
+              <th>Balance (USD)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for partner, data in partner_data.items()|sort(attribute='0') %}
+              <tr>
+                <td>{{ partner }}</td>
+                <td>
+                  {{ "{:,.0f}".format(data.get('export', 0)) }}
+                  {% if not data.get('export_reported', True) %}
+                    <span class="text-info" title="Mirror Data">*</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {{ "{:,.0f}".format(data.get('import', 0)) }}
+                  {% if not data.get('import_reported', True) %}
+                    <span class="text-info" title="Mirror Data">*</span>
+                  {% endif %}
+                </td>
+                <td class="{% if data.balance > 0 %}text-success{% elif data.balance < 0 %}text-danger{% else %}text-secondary{% endif %}">
+                  {{ "{:,.0f}".format(data.balance) }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p class="small text-muted">* Value based on partner's reported data (mirror flow).</p>
+      {% else %}
+        <div class="alert alert-warning">No specific partner trade data found for {{ selected_country }}.</div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
