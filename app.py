@@ -355,6 +355,71 @@ def network_analysis():
                            communities=community_results, # Pass communities to template
                            graph_info=graph_info,
                            error=error_message)
+    
+
+@app.route('/clusters')
+def clusters():
+    error_message = None
+    community_results = []  # List to hold communities
+    graph_info = {}  # Dictionary for basic graph info
+
+    if db is None:
+        error_message = "Database connection not available."
+    else:
+        try:
+            print("Fetching data for cluster analysis...")
+            # Query to filter data from the database
+            query = {
+                "partner": {"$ne": "World"}, "reporter": {"$ne": "World"},
+                "flow": "Export", "value": {"$gt": 0}
+            }
+            projection = {"_id": 0, "reporter": 1, "partner": 1, "value": 1}
+            trade_data = list(db.trade_records.find(query, projection))
+
+            if not trade_data:
+                error_message = "No suitable trade data found in database to build network (check filters)."
+            else:
+                print(f"Building network graph from {len(trade_data)} export records...")
+                G = nx.DiGraph()  # Directed graph
+                for record in trade_data:
+                    G.add_edge(record['reporter'], record['partner'], weight=record['value'])
+
+                # Ensure the graph is not empty
+                if G.number_of_nodes() == 0 or G.number_of_edges() == 0:
+                    error_message = "Graph could not be built (no valid nodes/edges)."
+                else:
+                    print(f"Graph built with {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
+                    graph_info['nodes'] = G.number_of_nodes()
+                    graph_info['edges'] = G.number_of_edges()
+
+                    # --- Calculate Communities (Louvain) ---
+                    print("Calculating Communities (Louvain method)...")
+                    try:
+                        communities_generator = nx_community.louvain_communities(
+                            G.to_undirected(), weight='weight'
+                        )
+                        # Convert list of sets to list of sorted lists for display
+                        community_results = [sorted(list(c)) for c in communities_generator]
+                        # Sort communities by size (largest first)
+                        community_results.sort(key=len, reverse=True)
+                        print(f"Found {len(community_results)} communities.")
+                    except Exception as e_comm:
+                        print(f"Error calculating communities: {e_comm}")
+                        community_results = []  # If there is an error, pass an empty list
+
+        except Exception as e:
+            error_message = f"Error during cluster analysis: {e}\n{traceback.format_exc()}"
+            print(error_message)
+
+    # Render the clusters page
+    return render_template(
+        'clusters.html',
+        communities=community_results,
+        graph_info=graph_info,
+        error=error_message
+    )
+
+
 
 # Run the app if this script is executed directly
 if __name__ == '__main__':
