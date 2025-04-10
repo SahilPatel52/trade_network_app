@@ -1,0 +1,6 @@
+Flask
+pymongo[srv]
+networkx
+python-louvain
+gunicorn  # <-- Add this for the production server
+pandas    # <-- Only if your current code still actively uses it
