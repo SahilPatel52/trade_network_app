@@ -1,0 +1,60 @@
+/* static/css/custom.css */
+
+body {
+    background-color: #f8f9fa;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Trade Mode Toggle Slider - wider container */
+  .trade-toggle-container {
+    width: 400px;  /* Increased width for a cooler, side-by-side slider */
+    margin: 0 auto 20px auto;
+  }
+  
+  .trade-toggle {
+    display: flex;
+    position: relative;
+    background: #e0e0e0;
+    border-radius: 25px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  
+  .trade-toggle .toggle-option {
+    flex: 1;
+    text-align: center;
+    padding: 14px 0;
+    color: #555;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+    transition: color 0.3s ease;
+  }
+  
+  .trade-toggle .toggle-option.active {
+    color: #fff;
+  }
+  
+  .trade-toggle .toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: #007bff;
+    border-radius: 25px;
+    transition: left 0.3s ease;
+    z-index: 1;
+  }
+  
+  /* Center the SVG map container */
+  #world-map-container {
+    margin: 0 auto;
+  }
+  
+  /* Ensure that when a country is selected, its fill is orange.
+     Use a more specific selector to override inline attributes. */
+  .country.selected {
+    fill: #FFA500 !important;
+  }
+  
